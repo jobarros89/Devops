@@ -51,3 +51,8 @@ A página `dashboard.html` usa **Chart.js** (open source, licença MIT) para:
 - mostrar gráfico de evolução por data
 - mostrar distribuição crédito x débito
 - detalhar todos os itens de crédito e débito em tabelas separadas
+
+
+## Manual para usuários leigos
+
+Consulte o arquivo `MANUAL-USABILIDADE.md` para instruções passo a passo em linguagem simples.
