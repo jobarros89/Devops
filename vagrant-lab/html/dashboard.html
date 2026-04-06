@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard de Saúde Financeira</title>
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <style>
+    body { background:#f8fafc; }
+    .header { background: linear-gradient(135deg, #0f172a, #1d4ed8); color: #fff; border-radius: 1rem; }
+    .card { border: 0; border-radius: 1rem; box-shadow: 0 8px 20px rgba(15,23,42,.08); }
+    .health-ok { color:#16a34a; }
+    .health-alert { color:#dc2626; }
+    .global-warning { border-radius:.75rem; }
+
+    @media (max-width: 576px) {
+      .header { border-radius: .75rem; }
+      .card { border-radius: .75rem; }
+      .table { font-size: .875rem; }
+      #historyChart { height: 200px !important; }
+      #distributionChart { height: 220px !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container py-4 py-md-5">
+    <section class="header p-4 p-md-5 mb-4">
+      <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <div>
+          <h1 class="h3 mb-1"><i class="fas fa-heartbeat mr-2"></i>Dashboard de Saúde Financeira</h1>
+          <p class="mb-0">Monitoramento automático de crédito vs débito com detalhamento dos lançamentos.</p>
+        </div>
+        <a href="index.html" class="btn btn-light mt-3 mt-md-0"><i class="fas fa-arrow-left mr-1"></i>Voltar ao app</a>
+      </div>
+    </section>
+
+    <div id="globalWarning" class="alert alert-warning global-warning d-none" role="alert"></div>
+
+    <div class="row mb-4">
+      <div class="col-md-3 mb-3 mb-md-0"><div class="card p-3"><small class="text-muted">Total crédito</small><div id="creditTotal" class="h4 text-success mb-0">R$ 0,00</div></div></div>
+      <div class="col-md-3 mb-3 mb-md-0"><div class="card p-3"><small class="text-muted">Total débito</small><div id="debitTotal" class="h4 text-danger mb-0">R$ 0,00</div></div></div>
+      <div class="col-md-3 mb-3 mb-md-0"><div class="card p-3"><small class="text-muted">Saldo</small><div id="balanceTotal" class="h4 text-primary mb-0">R$ 0,00</div></div></div>
+      <div class="col-md-3"><div class="card p-3"><small class="text-muted">Saúde financeira</small><div id="healthStatus" class="h5 mb-0">Carregando...</div></div></div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col-lg-8 mb-4 mb-lg-0">
+        <div class="card p-4">
+          <h2 class="h5 mb-3">Evolução de entradas e saídas</h2>
+          <canvas id="historyChart" height="120"></canvas>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card p-4 h-100">
+          <h2 class="h5 mb-3">Distribuição</h2>
+          <canvas id="distributionChart" height="220"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-6 mb-4">
+        <div class="card p-4">
+          <h2 class="h5 text-success">Detalhamento de Créditos</h2>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th class="text-right">Valor</th></tr></thead>
+              <tbody id="creditTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 mb-4">
+        <div class="card p-4">
+          <h2 class="h5 text-danger">Detalhamento de Débitos</h2>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th class="text-right">Valor</th></tr></thead>
+              <tbody id="debitTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="app-config.js"></script>
+  <script>
+    const APP_CONFIG = window.FINANCE_APP_CONFIG || {};
+    const API_BASE_URL = (APP_CONFIG.API_BASE_URL || '').replace(/\\/$/, '');
+    const API_URL = `${API_BASE_URL}/api/transactions` || '/api/transactions';
+    const STORAGE_KEY = 'finance_transactions_v2';
+    const REQUIRE_REMOTE = APP_CONFIG.REQUIRE_REMOTE === true;
+
+    const currency = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const brDate = (v) => (v || '').split('-').reverse().join('/');
+
+    async function loadTransactions() {
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error('API indisponível');
+        const data = await response.json();
+        return data.transactions || [];
+      } catch {
+        if (REQUIRE_REMOTE) return [];
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      }
+    }
+
+    function renderRows(rows, elementId) {
+      const target = document.getElementById(elementId);
+      target.innerHTML = '';
+      if (!rows.length) {
+        target.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Sem itens</td></tr>';
+        return;
+      }
+
+      rows.forEach((item) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${brDate(item.date)}</td>
+          <td>${item.description}</td>
+          <td>${item.category}</td>
+          <td class="text-right">${currency(Number(item.amount))}</td>
+        `;
+        target.appendChild(tr);
+      });
+    }
+
+    function groupedByDate(rows, type) {
+      return rows
+        .filter((t) => t.type === type)
+        .reduce((acc, item) => {
+          acc[item.date] = (acc[item.date] || 0) + Number(item.amount);
+          return acc;
+        }, {});
+    }
+
+    function renderCharts(rows) {
+      const dates = [...new Set(rows.map((r) => r.date))].sort();
+      const credits = groupedByDate(rows, 'credito');
+      const debits = groupedByDate(rows, 'debito');
+
+      new Chart(document.getElementById('historyChart'), {
+        type: 'line',
+        data: {
+          labels: dates,
+          datasets: [
+            { label: 'Crédito', data: dates.map((d) => credits[d] || 0), borderColor: '#16a34a', backgroundColor: 'rgba(22,163,74,.2)', tension: .25 },
+            { label: 'Débito', data: dates.map((d) => debits[d] || 0), borderColor: '#dc2626', backgroundColor: 'rgba(220,38,38,.2)', tension: .25 }
+          ]
+        },
+        options: { responsive: true }
+      });
+
+      const totalCredit = rows.filter((r) => r.type === 'credito').reduce((sum, r) => sum + Number(r.amount), 0);
+      const totalDebit = rows.filter((r) => r.type === 'debito').reduce((sum, r) => sum + Number(r.amount), 0);
+
+      new Chart(document.getElementById('distributionChart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Crédito', 'Débito'],
+          datasets: [{ data: [totalCredit, totalDebit], backgroundColor: ['#16a34a', '#dc2626'] }]
+        },
+        options: { responsive: true }
+      });
+    }
+
+    async function init() {
+      const rows = await loadTransactions();
+      const warning = document.getElementById('globalWarning');
+      const hasRows = rows.length > 0;
+
+      warning.classList.toggle('d-none', hasRows || !REQUIRE_REMOTE);
+      if (!hasRows && REQUIRE_REMOTE) {
+        warning.textContent = 'Sem conexão com backend global. Configure app-config.js (API_BASE_URL) e publique a API.';
+      }
+
+      const credits = rows.filter((r) => r.type === 'credito');
+      const debits = rows.filter((r) => r.type === 'debito');
+
+      const totalCredit = credits.reduce((sum, r) => sum + Number(r.amount), 0);
+      const totalDebit = debits.reduce((sum, r) => sum + Number(r.amount), 0);
+      const balance = totalCredit - totalDebit;
+
+      document.getElementById('creditTotal').textContent = currency(totalCredit);
+      document.getElementById('debitTotal').textContent = currency(totalDebit);
+      document.getElementById('balanceTotal').textContent = currency(balance);
+
+      const status = document.getElementById('healthStatus');
+      if (totalCredit > totalDebit) {
+        status.textContent = 'Saudável ✅ (crédito maior que débito)';
+        status.className = 'h5 mb-0 health-ok';
+      } else if (totalCredit === totalDebit) {
+        status.textContent = 'Em atenção ⚠️ (empate entre crédito e débito)';
+        status.className = 'h5 mb-0 text-warning';
+      } else {
+        status.textContent = 'Crítico ❌ (débito maior que crédito)';
+        status.className = 'h5 mb-0 health-alert';
+      }
+
+      renderRows(credits, 'creditTable');
+      renderRows(debits, 'debitTable');
+      renderCharts(rows);
+    }
+
+    init();
+  </script>
+</body>
+</html>
