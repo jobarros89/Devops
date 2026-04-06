@@ -1,16 +1,13 @@
 {
   "version": 2,
-  "routes": [
+  "rewrites": [
     {
-      "handle": "filesystem"
+      "source": "/",
+      "destination": "/vagrant-lab/html/index.html"
     },
     {
-      "src": "^/$",
-      "dest": "/vagrant-lab/html/index.html"
-    },
-    {
-      "src": "^/(.*)$",
-      "dest": "/vagrant-lab/html/$1"
+      "source": "/((?!api/).*)",
+      "destination": "/vagrant-lab/html/$1"
     }
   ]
 }
