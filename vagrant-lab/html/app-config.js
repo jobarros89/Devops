@@ -5,5 +5,5 @@ window.FINANCE_APP_CONFIG = {
 
   // Modo global (recomendado): exige backend online para todos os usuários
   // compartilharem os mesmos dados.
-  REQUIRE_REMOTE: false
+  REQUIRE_REMOTE: true
 };
