@@ -127,3 +127,21 @@ Depois valide com:
 python -m json.tool vercel.json
 ./scripts/check-merge-conflicts.sh
 ```
+
+## Modo global (múltiplas pessoas)
+
+Para várias pessoas acessarem os **mesmos dados**, a aplicação precisa rodar com backend online (Vercel + Supabase), sem fallback local.
+
+1. Configure o frontend em `vagrant-lab/html/app-config.js`:
+
+```js
+window.FINANCE_APP_CONFIG = {
+  API_BASE_URL: '', // mesmo domínio da Vercel, ou URL do backend
+  REQUIRE_REMOTE: true
+};
+```
+
+2. Publique a API (`/api/transactions` e `/api/whatsapp-webhook`) com variáveis de ambiente da seção Supabase/WhatsApp.
+3. Compartilhe a URL pública da Vercel com os usuários.
+
+Com `REQUIRE_REMOTE: true`, se o backend cair o app mostra alerta e não grava localmente, evitando dados divergentes entre pessoas.

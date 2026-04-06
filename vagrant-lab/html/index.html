@@ -23,6 +23,7 @@
     .status-online { background: #16a34a; }
     .status-offline { background: #d97706; }
     code { background: #f1f5f9; padding: .1rem .3rem; border-radius: .35rem; }
+    .global-warning { border-radius: .75rem; }
   </style>
 </head>
 <body>
@@ -40,6 +41,8 @@
         </div>
       </div>
     </section>
+
+    <div id="globalWarning" class="alert alert-warning global-warning d-none" role="alert"></div>
 
     <div class="row">
       <div class="col-lg-4 mb-4">
@@ -112,9 +115,13 @@
     </div>
   </main>
 
+  <script src="app-config.js"></script>
   <script>
     const STORAGE_KEY = 'finance_transactions_v2';
-    const API_URL = '/api/transactions';
+    const APP_CONFIG = window.FINANCE_APP_CONFIG || {};
+    const API_BASE_URL = (APP_CONFIG.API_BASE_URL || '').replace(/\\/$/, '');
+    const API_URL = `${API_BASE_URL}/api/transactions` || '/api/transactions';
+    const REQUIRE_REMOTE = APP_CONFIG.REQUIRE_REMOTE !== false;
     let usingRemote = false;
     let transactionsCache = [];
 
@@ -124,6 +131,7 @@
     const filterType = document.getElementById('filterType');
     const clearAllBtn = document.getElementById('clearAllBtn');
     const syncStatus = document.getElementById('syncStatus');
+    const globalWarning = document.getElementById('globalWarning');
 
     const creditTotal = document.getElementById('creditTotal');
     const debitTotal = document.getElementById('debitTotal');
@@ -134,9 +142,20 @@
 
     const setStatus = (remote) => {
       usingRemote = remote;
+      const offlineMessage = REQUIRE_REMOTE
+        ? 'Backend indisponível. Configure API_BASE_URL em app-config.js e publique backend para uso global.'
+        : 'Modo local (sem backend configurado)';
+
       syncStatus.innerHTML = remote
         ? '<span class="status-dot status-online"></span>Sincronização online (site + WhatsApp + apps instaláveis)'
-        : '<span class="status-dot status-offline"></span>Modo local (sem backend configurado)';
+        : `<span class="status-dot status-offline"></span>${offlineMessage}`;
+
+      globalWarning.classList.toggle('d-none', remote);
+      if (!remote) {
+        globalWarning.textContent = REQUIRE_REMOTE
+          ? 'Aplicação em modo global: sem backend online não há sincronização entre pessoas/dispositivos.'
+          : 'Você está no modo local. Os dados ficam somente neste navegador.';
+      }
     };
 
     const getLocalTransactions = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
@@ -154,12 +173,13 @@
         transactionsCache = payload.transactions || [];
         setStatus(true);
       } catch (error) {
-        transactionsCache = getLocalTransactions();
+        transactionsCache = REQUIRE_REMOTE ? [] : getLocalTransactions();
         setStatus(false);
       }
     };
 
     const persistCreate = async (transaction) => {
+      if (!usingRemote && REQUIRE_REMOTE) throw new Error('Backend indisponível');
       if (usingRemote) {
         await requestJSON(API_URL, { method: 'POST', body: JSON.stringify(transaction) });
         await loadTransactions();
@@ -170,6 +190,7 @@
     };
 
     const persistDelete = async (id) => {
+      if (!usingRemote && REQUIRE_REMOTE) throw new Error('Backend indisponível');
       if (usingRemote) {
         await requestJSON(`${API_URL}?id=${id}`, { method: 'DELETE' });
         await loadTransactions();
@@ -180,6 +201,7 @@
     };
 
     const persistClear = async () => {
+      if (!usingRemote && REQUIRE_REMOTE) throw new Error('Backend indisponível');
       if (usingRemote) {
         await requestJSON(API_URL, { method: 'DELETE' });
         await loadTransactions();
@@ -235,23 +257,35 @@
 
       if (!transaction.description || !transaction.category || !transaction.date || transaction.amount <= 0) return;
 
-      await persistCreate(transaction);
-      form.reset();
-      document.getElementById('date').valueAsDate = new Date();
-      render();
+      try {
+        await persistCreate(transaction);
+        form.reset();
+        document.getElementById('date').valueAsDate = new Date();
+        render();
+      } catch (error) {
+        alert('Backend indisponível. Para uso global, publique a API e configure app-config.js');
+      }
     });
 
     body.addEventListener('click', async (event) => {
       const button = event.target.closest('button[data-id]');
       if (!button) return;
-      await persistDelete(Number(button.dataset.id));
-      render();
+      try {
+        await persistDelete(Number(button.dataset.id));
+        render();
+      } catch (error) {
+        alert('Backend indisponível. Não foi possível remover no modo global.');
+      }
     });
 
     clearAllBtn.addEventListener('click', async () => {
       if (!confirm('Tem certeza que deseja apagar todas as movimentações?')) return;
-      await persistClear();
-      render();
+      try {
+        await persistClear();
+        render();
+      } catch (error) {
+        alert('Backend indisponível. Não foi possível limpar no modo global.');
+      }
     });
 
     filterType.addEventListener('change', render);
