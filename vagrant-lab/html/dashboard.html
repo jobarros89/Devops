@@ -14,14 +14,6 @@
     .health-ok { color:#16a34a; }
     .health-alert { color:#dc2626; }
     .global-warning { border-radius:.75rem; }
-
-    @media (max-width: 576px) {
-      .header { border-radius: .75rem; }
-      .card { border-radius: .75rem; }
-      .table { font-size: .875rem; }
-      #historyChart { height: 200px !important; }
-      #distributionChart { height: 220px !important; }
-    }
   </style>
 </head>
 <body>
@@ -92,7 +84,7 @@
     const API_BASE_URL = (APP_CONFIG.API_BASE_URL || '').replace(/\\/$/, '');
     const API_URL = `${API_BASE_URL}/api/transactions` || '/api/transactions';
     const STORAGE_KEY = 'finance_transactions_v2';
-    const REQUIRE_REMOTE = APP_CONFIG.REQUIRE_REMOTE === true;
+    const REQUIRE_REMOTE = APP_CONFIG.REQUIRE_REMOTE !== false;
 
     const currency = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     const brDate = (v) => (v || '').split('-').reverse().join('/');

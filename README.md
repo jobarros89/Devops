@@ -145,27 +145,3 @@ window.FINANCE_APP_CONFIG = {
 3. Compartilhe a URL pública da Vercel com os usuários.
 
 Com `REQUIRE_REMOTE: true`, se o backend cair o app mostra alerta e não grava localmente, evitando dados divergentes entre pessoas.
-
-## Layout responsivo para celular
-
-A interface principal (`index.html`) e o dashboard (`dashboard.html`) foram ajustados para telas pequenas:
-- botões do cabeçalho em largura total no mobile,
-- filtro ocupando largura total,
-- cards e tabelas com melhor legibilidade,
-- ajustes de gráficos no dashboard para melhor visualização em smartphones.
-
-## Correção de bug: "não está salvando"
-
-Se a aplicação não estiver salvando, o motivo comum é `REQUIRE_REMOTE: true` com backend indisponível.
-
-Ajuste em `vagrant-lab/html/app-config.js`:
-
-```js
-window.FINANCE_APP_CONFIG = {
-  API_BASE_URL: '',
-  REQUIRE_REMOTE: false
-};
-```
-
-- `false` (padrão): salva localmente quando a API estiver fora.
-- `true`: exige backend online (modo global estrito).

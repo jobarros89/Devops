@@ -23,17 +23,7 @@
     .status-online { background: #16a34a; }
     .status-offline { background: #d97706; }
     code { background: #f1f5f9; padding: .1rem .3rem; border-radius: .35rem; }
-    .global-warning { border-radius: .75rem; }
-
-    @media (max-width: 576px) {
-      .app-header { border-radius: .75rem; }
-      .header-actions { width: 100%; display: flex; flex-direction: column; }
-      .header-actions .btn { width: 100%; margin-right: 0 !important; margin-top: .5rem; }
-      .filter-select { max-width: 100% !important; }
-      .card { border-radius: .75rem; }
-      .table { font-size: .875rem; }
-      .table th:nth-child(2), .table td:nth-child(2) { display: none; }
-    }
+ main
   </style>
 </head>
 <body>
@@ -45,7 +35,7 @@
           <p class="mb-0">Controle crédito/débito no site e receba lançamentos enviados pelo WhatsApp.</p>
           <small id="syncStatus" class="d-inline-flex align-items-center mt-2"></small>
         </div>
-        <div class="mt-3 mt-md-0 d-flex gap-2 header-actions">
+        <div class="mt-3 mt-md-0 d-flex gap-2">
           <a href="dashboard.html" class="btn btn-light mr-2"><i class="fas fa-chart-line mr-1"></i>Dashboard de Saúde</a>
           <button id="clearAllBtn" class="btn btn-outline-light"><i class="fas fa-trash-alt mr-1"></i>Limpar tudo</button>
         </div>
@@ -107,7 +97,7 @@
         <div class="card p-3 p-md-4">
           <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
             <h2 class="h5 mb-2 mb-sm-0">Histórico de movimentações</h2>
-            <select id="filterType" class="form-control form-control-sm filter-select" style="max-width: 220px;">
+            <select id="filterType" class="form-control form-control-sm" style="max-width: 220px;">
               <option value="todas">Filtrar: Todas</option>
               <option value="credito">Somente crédito</option>
               <option value="debito">Somente débito</option>
@@ -131,7 +121,7 @@
     const APP_CONFIG = window.FINANCE_APP_CONFIG || {};
     const API_BASE_URL = (APP_CONFIG.API_BASE_URL || '').replace(/\\/$/, '');
     const API_URL = `${API_BASE_URL}/api/transactions` || '/api/transactions';
-    const REQUIRE_REMOTE = APP_CONFIG.REQUIRE_REMOTE === true;
+    const REQUIRE_REMOTE = APP_CONFIG.REQUIRE_REMOTE !== false;
     let usingRemote = false;
     let transactionsCache = [];
 
@@ -191,14 +181,9 @@
     const persistCreate = async (transaction) => {
       if (!usingRemote && REQUIRE_REMOTE) throw new Error('Backend indisponível');
       if (usingRemote) {
-        try {
-          await requestJSON(API_URL, { method: 'POST', body: JSON.stringify(transaction) });
-          await loadTransactions();
-          return;
-        } catch (error) {
-          if (REQUIRE_REMOTE) throw error;
-          setStatus(false);
-        }
+        await requestJSON(API_URL, { method: 'POST', body: JSON.stringify(transaction) });
+        await loadTransactions();
+        return;
       }
       transactionsCache.unshift(transaction);
       saveLocalTransactions(transactionsCache);
@@ -207,14 +192,9 @@
     const persistDelete = async (id) => {
       if (!usingRemote && REQUIRE_REMOTE) throw new Error('Backend indisponível');
       if (usingRemote) {
-        try {
-          await requestJSON(`${API_URL}?id=${id}`, { method: 'DELETE' });
-          await loadTransactions();
-          return;
-        } catch (error) {
-          if (REQUIRE_REMOTE) throw error;
-          setStatus(false);
-        }
+        await requestJSON(`${API_URL}?id=${id}`, { method: 'DELETE' });
+        await loadTransactions();
+        return;
       }
       transactionsCache = transactionsCache.filter((t) => t.id !== id);
       saveLocalTransactions(transactionsCache);
@@ -223,14 +203,9 @@
     const persistClear = async () => {
       if (!usingRemote && REQUIRE_REMOTE) throw new Error('Backend indisponível');
       if (usingRemote) {
-        try {
-          await requestJSON(API_URL, { method: 'DELETE' });
-          await loadTransactions();
-          return;
-        } catch (error) {
-          if (REQUIRE_REMOTE) throw error;
-          setStatus(false);
-        }
+        await requestJSON(API_URL, { method: 'DELETE' });
+        await loadTransactions();
+        return;
       }
       transactionsCache = [];
       localStorage.removeItem(STORAGE_KEY);
@@ -305,12 +280,9 @@
 
     clearAllBtn.addEventListener('click', async () => {
       if (!confirm('Tem certeza que deseja apagar todas as movimentações?')) return;
-      try {
-        await persistClear();
-        render();
-      } catch (error) {
-        alert('Backend indisponível. Não foi possível limpar no modo global.');
-      }
+      await persistClear();
+      render();
+ main
     });
 
     filterType.addEventListener('change', render);
