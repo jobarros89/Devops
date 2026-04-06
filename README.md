@@ -66,3 +66,37 @@ Se aparecer erro de conflito como `<<<<<<<`, `=======` e `>>>>>>>`, execute:
 ```
 
 Esse script valida o repositório e falha se encontrar marcadores de conflito em arquivos de código.
+
+### Erro comum: `cd: too many arguments`
+
+Isso acontece quando `cd` e o script ficam colados na mesma linha sem separador.
+
+❌ Errado:
+```bash
+cd /workspace/Devops./scripts/connect-and-clone.sh --repo jobarros89/Devops --https
+```
+
+✅ Correto (com `&&`):
+```bash
+cd /workspace/Devops && ./scripts/connect-and-clone.sh --repo jobarros89/Devops --https
+```
+
+✅ Também funciona em duas linhas:
+```bash
+cd /workspace/Devops
+./scripts/connect-and-clone.sh --repo jobarros89/Devops --https
+```
+
+## Gerar comando `git clone`
+
+Use o helper abaixo para gerar o clone (HTTPS/SSH) e os comandos de conexão do repositório local:
+
+```bash
+./scripts/connect-and-clone.sh --repo jobarros89/Devops --https
+```
+
+Opção SSH:
+
+```bash
+./scripts/connect-and-clone.sh --repo jobarros89/Devops --ssh
+```
