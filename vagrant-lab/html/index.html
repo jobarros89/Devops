@@ -23,7 +23,7 @@
     .status-online { background: #16a34a; }
     .status-offline { background: #d97706; }
     code { background: #f1f5f9; padding: .1rem .3rem; border-radius: .35rem; }
-    .global-warning { border-radius: .75rem; }
+ main
   </style>
 </head>
 <body>
@@ -280,12 +280,9 @@
 
     clearAllBtn.addEventListener('click', async () => {
       if (!confirm('Tem certeza que deseja apagar todas as movimentações?')) return;
-      try {
-        await persistClear();
-        render();
-      } catch (error) {
-        alert('Backend indisponível. Não foi possível limpar no modo global.');
-      }
+      await persistClear();
+      render();
+ main
     });
 
     filterType.addEventListener('change', render);
