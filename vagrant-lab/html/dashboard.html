@@ -85,6 +85,7 @@
     const API_URL = `${API_BASE_URL}/api/transactions` || '/api/transactions';
     const STORAGE_KEY = 'finance_transactions_v2';
     const REQUIRE_REMOTE = APP_CONFIG.REQUIRE_REMOTE !== false;
+    let chartInstances = {};
 
     const currency = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     const brDate = (v) => (v || '').split('-').reverse().join('/');
@@ -135,7 +136,10 @@
       const credits = groupedByDate(rows, 'credito');
       const debits = groupedByDate(rows, 'debito');
 
-      new Chart(document.getElementById('historyChart'), {
+      if (chartInstances.history) chartInstances.history.destroy();
+      if (chartInstances.distribution) chartInstances.distribution.destroy();
+
+      chartInstances.history = new Chart(document.getElementById('historyChart'), {
         type: 'line',
         data: {
           labels: dates,
@@ -150,7 +154,7 @@
       const totalCredit = rows.filter((r) => r.type === 'credito').reduce((sum, r) => sum + Number(r.amount), 0);
       const totalDebit = rows.filter((r) => r.type === 'debito').reduce((sum, r) => sum + Number(r.amount), 0);
 
-      new Chart(document.getElementById('distributionChart'), {
+      chartInstances.distribution = new Chart(document.getElementById('distributionChart'), {
         type: 'doughnut',
         data: {
           labels: ['Crédito', 'Débito'],
@@ -160,7 +164,7 @@
       });
     }
 
-    async function init() {
+    async function updateDashboard() {
       const rows = await loadTransactions();
       const warning = document.getElementById('globalWarning');
       const hasRows = rows.length > 0;
@@ -198,7 +202,8 @@
       renderCharts(rows);
     }
 
-    init();
+    updateDashboard();
+    setInterval(updateDashboard, 3000);
   </script>
 </body>
 </html>
