@@ -100,3 +100,30 @@ Opção SSH:
 ```bash
 ./scripts/connect-and-clone.sh --repo jobarros89/Devops --ssh
 ```
+
+## Resolver conflito de merge no `vercel.json`
+
+Se aparecer conflito como `<<<<<<< HEAD` no `vercel.json`, mantenha **apenas** este conteúdo final:
+
+```json
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/vagrant-lab/html/index.html"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/vagrant-lab/html/$1"
+    }
+  ]
+}
+```
+
+Depois valide com:
+
+```bash
+python -m json.tool vercel.json
+./scripts/check-merge-conflicts.sh
+```
