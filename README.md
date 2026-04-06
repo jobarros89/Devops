@@ -56,3 +56,13 @@ A página `dashboard.html` usa **Chart.js** (open source, licença MIT) para:
 ## Manual para usuários leigos
 
 Consulte o arquivo `MANUAL-USABILIDADE.md` para instruções passo a passo em linguagem simples.
+
+## Verificação de conflitos de merge
+
+Se aparecer erro de conflito como `<<<<<<<`, `=======` e `>>>>>>>`, execute:
+
+```bash
+./scripts/check-merge-conflicts.sh
+```
+
+Esse script valida o repositório e falha se encontrar marcadores de conflito em arquivos de código.
