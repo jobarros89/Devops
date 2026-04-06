@@ -119,7 +119,7 @@
   <script>
     const STORAGE_KEY = 'finance_transactions_v2';
     const APP_CONFIG = window.FINANCE_APP_CONFIG || {};
-    const API_BASE_URL = (APP_CONFIG.API_BASE_URL || '').replace(/\\/$/, '');
+    const API_BASE_URL = (APP_CONFIG.API_BASE_URL || '').replace(/\/$/, '');
     const API_URL = `${API_BASE_URL}/api/transactions` || '/api/transactions';
     const REQUIRE_REMOTE = APP_CONFIG.REQUIRE_REMOTE !== false;
     let usingRemote = false;
