@@ -66,3 +66,82 @@ Se aparecer erro de conflito como `<<<<<<<`, `=======` e `>>>>>>>`, execute:
 ```
 
 Esse script valida o repositório e falha se encontrar marcadores de conflito em arquivos de código.
+
+### Erro comum: `cd: too many arguments`
+
+Isso acontece quando `cd` e o script ficam colados na mesma linha sem separador.
+
+❌ Errado:
+```bash
+cd /workspace/Devops./scripts/connect-and-clone.sh --repo jobarros89/Devops --https
+```
+
+✅ Correto (com `&&`):
+```bash
+cd /workspace/Devops && ./scripts/connect-and-clone.sh --repo jobarros89/Devops --https
+```
+
+✅ Também funciona em duas linhas:
+```bash
+cd /workspace/Devops
+./scripts/connect-and-clone.sh --repo jobarros89/Devops --https
+```
+
+## Gerar comando `git clone`
+
+Use o helper abaixo para gerar o clone (HTTPS/SSH) e os comandos de conexão do repositório local:
+
+```bash
+./scripts/connect-and-clone.sh --repo jobarros89/Devops --https
+```
+
+Opção SSH:
+
+```bash
+./scripts/connect-and-clone.sh --repo jobarros89/Devops --ssh
+```
+
+## Resolver conflito de merge no `vercel.json`
+
+Se aparecer conflito como `<<<<<<< HEAD` no `vercel.json`, mantenha **apenas** este conteúdo final:
+
+```json
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/vagrant-lab/html/index.html"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/vagrant-lab/html/$1"
+    }
+  ]
+}
+```
+
+Depois valide com:
+
+```bash
+python -m json.tool vercel.json
+./scripts/check-merge-conflicts.sh
+```
+
+## Modo global (múltiplas pessoas)
+
+Para várias pessoas acessarem os **mesmos dados**, a aplicação precisa rodar com backend online (Vercel + Supabase), sem fallback local.
+
+1. Configure o frontend em `vagrant-lab/html/app-config.js`:
+
+```js
+window.FINANCE_APP_CONFIG = {
+  API_BASE_URL: '', // mesmo domínio da Vercel, ou URL do backend
+  REQUIRE_REMOTE: true
+};
+```
+
+2. Publique a API (`/api/transactions` e `/api/whatsapp-webhook`) com variáveis de ambiente da seção Supabase/WhatsApp.
+3. Compartilhe a URL pública da Vercel com os usuários.
+
+Com `REQUIRE_REMOTE: true`, se o backend cair o app mostra alerta e não grava localmente, evitando dados divergentes entre pessoas.

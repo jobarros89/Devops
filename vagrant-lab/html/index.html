@@ -5,57 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Gestor Financeiro | Crédito e Débito</title>
 
-<<<<<<< HEAD
-  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
-
-  <style>
-    body {
-      background: #f5f7fb;
-      min-height: 100vh;
-    }
-
-    .app-header {
-      background: linear-gradient(135deg, #1d4ed8, #2563eb);
-      color: #fff;
-      border-radius: 1rem;
-      box-shadow: 0 12px 30px rgba(37, 99, 235, 0.25);
-    }
-
-    .card {
-      border: 0;
-      border-radius: 1rem;
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
-    }
-
-    .summary-value {
-      font-size: 1.4rem;
-      font-weight: 700;
-    }
-
-    .badge-credit {
-      background-color: #d1fae5;
-      color: #065f46;
-      font-weight: 600;
-    }
-
-    .badge-debit {
-      background-color: #fee2e2;
-      color: #991b1b;
-      font-weight: 600;
-    }
-
-    .table td,
-    .table th {
-      vertical-align: middle;
-    }
-
-    .empty-state {
-      padding: 2rem;
-      text-align: center;
-      color: #6b7280;
-    }
-=======
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#1d4ed8">
   <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -74,7 +23,7 @@
     .status-online { background: #16a34a; }
     .status-offline { background: #d97706; }
     code { background: #f1f5f9; padding: .1rem .3rem; border-radius: .35rem; }
->>>>>>> codex/create-expense-management-app-40d774
+ main
   </style>
 </head>
 <body>
@@ -83,13 +32,6 @@
       <div class="d-flex align-items-center justify-content-between flex-wrap">
         <div>
           <h1 class="h3 mb-1"><i class="fas fa-wallet mr-2"></i>Gestor Financeiro</h1>
-<<<<<<< HEAD
-          <p class="mb-0">Controle suas entradas e saídas com cartões de crédito e débito.</p>
-        </div>
-        <button id="clearAllBtn" class="btn btn-outline-light mt-3 mt-md-0">
-          <i class="fas fa-trash-alt mr-1"></i>Limpar tudo
-        </button>
-=======
           <p class="mb-0">Controle crédito/débito no site e receba lançamentos enviados pelo WhatsApp.</p>
           <small id="syncStatus" class="d-inline-flex align-items-center mt-2"></small>
         </div>
@@ -97,27 +39,20 @@
           <a href="dashboard.html" class="btn btn-light mr-2"><i class="fas fa-chart-line mr-1"></i>Dashboard de Saúde</a>
           <button id="clearAllBtn" class="btn btn-outline-light"><i class="fas fa-trash-alt mr-1"></i>Limpar tudo</button>
         </div>
->>>>>>> codex/create-expense-management-app-40d774
       </div>
     </section>
 
+    <div id="globalWarning" class="alert alert-warning global-warning d-none" role="alert"></div>
+
     <div class="row">
       <div class="col-lg-4 mb-4">
-<<<<<<< HEAD
-        <div class="card p-4 h-100">
-=======
         <div class="card p-4 h-100 mb-4">
->>>>>>> codex/create-expense-management-app-40d774
           <h2 class="h5 mb-3">Nova movimentação</h2>
           <form id="transactionForm">
             <div class="form-group">
               <label for="description">Descrição</label>
               <input id="description" class="form-control" placeholder="Ex.: Supermercado" required>
             </div>
-<<<<<<< HEAD
-
-=======
->>>>>>> codex/create-expense-management-app-40d774
             <div class="form-row">
               <div class="form-group col-md-6">
                 <label for="amount">Valor (R$)</label>
@@ -131,52 +66,14 @@
                 </select>
               </div>
             </div>
-<<<<<<< HEAD
-
-=======
->>>>>>> codex/create-expense-management-app-40d774
             <div class="form-group">
               <label for="category">Categoria</label>
               <input id="category" class="form-control" placeholder="Ex.: Alimentação" required>
             </div>
-<<<<<<< HEAD
-
-=======
->>>>>>> codex/create-expense-management-app-40d774
             <div class="form-group">
               <label for="date">Data</label>
               <input id="date" type="date" class="form-control" required>
             </div>
-<<<<<<< HEAD
-
-            <button class="btn btn-primary btn-block" type="submit">
-              <i class="fas fa-plus mr-1"></i>Adicionar
-            </button>
-          </form>
-        </div>
-      </div>
-
-      <div class="col-lg-8">
-        <div class="row mb-3">
-          <div class="col-md-4 mb-3 mb-md-0">
-            <div class="card p-3">
-              <small class="text-muted">Total crédito</small>
-              <div id="creditTotal" class="summary-value text-success">R$ 0,00</div>
-            </div>
-          </div>
-          <div class="col-md-4 mb-3 mb-md-0">
-            <div class="card p-3">
-              <small class="text-muted">Total débito</small>
-              <div id="debitTotal" class="summary-value text-danger">R$ 0,00</div>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="card p-3">
-              <small class="text-muted">Saldo</small>
-              <div id="balanceTotal" class="summary-value text-primary">R$ 0,00</div>
-            </div>
-          </div>
-=======
             <button class="btn btn-primary btn-block" type="submit"><i class="fas fa-plus mr-1"></i>Adicionar</button>
           </form>
         </div>
@@ -195,7 +92,6 @@
           <div class="col-md-4 mb-3 mb-md-0"><div class="card p-3"><small class="text-muted">Total crédito</small><div id="creditTotal" class="summary-value text-success">R$ 0,00</div></div></div>
           <div class="col-md-4 mb-3 mb-md-0"><div class="card p-3"><small class="text-muted">Total débito</small><div id="debitTotal" class="summary-value text-danger">R$ 0,00</div></div></div>
           <div class="col-md-4"><div class="card p-3"><small class="text-muted">Saldo</small><div id="balanceTotal" class="summary-value text-primary">R$ 0,00</div></div></div>
->>>>>>> codex/create-expense-management-app-40d774
         </div>
 
         <div class="card p-3 p-md-4">
@@ -206,29 +102,6 @@
               <option value="credito">Somente crédito</option>
               <option value="debito">Somente débito</option>
             </select>
-<<<<<<< HEAD
-          </div>
-
-          <div class="table-responsive">
-            <table class="table table-hover mb-0">
-              <thead>
-                <tr>
-                  <th>Descrição</th>
-                  <th>Categoria</th>
-                  <th>Data</th>
-                  <th>Tipo</th>
-                  <th class="text-right">Valor</th>
-                  <th class="text-right">Ações</th>
-                </tr>
-              </thead>
-              <tbody id="transactionsBody"></tbody>
-            </table>
-          </div>
-
-          <div id="emptyState" class="empty-state d-none">
-            Nenhuma movimentação cadastrada.
-=======
->>>>>>> codex/create-expense-management-app-40d774
           </div>
           <div class="table-responsive">
             <table class="table table-hover mb-0">
@@ -242,47 +115,13 @@
     </div>
   </main>
 
+  <script src="app-config.js"></script>
   <script>
-<<<<<<< HEAD
-    const STORAGE_KEY = 'finance_transactions_v1';
-    const form = document.getElementById('transactionForm');
-    const body = document.getElementById('transactionsBody');
-    const emptyState = document.getElementById('emptyState');
-    const filterType = document.getElementById('filterType');
-    const clearAllBtn = document.getElementById('clearAllBtn');
-
-    const creditTotal = document.getElementById('creditTotal');
-    const debitTotal = document.getElementById('debitTotal');
-    const balanceTotal = document.getElementById('balanceTotal');
-
-    const formatCurrency = (value) => value.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    });
-
-    const formatDate = (date) => {
-      if (!date) return '-';
-      const [year, month, day] = date.split('-');
-      return `${day}/${month}/${year}`;
-    };
-
-    const getTransactions = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    const saveTransactions = (transactions) => localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
-
-    const updateSummary = (transactions) => {
-      const credit = transactions
-        .filter(t => t.type === 'credito')
-        .reduce((acc, t) => acc + Number(t.amount), 0);
-
-      const debit = transactions
-        .filter(t => t.type === 'debito')
-        .reduce((acc, t) => acc + Number(t.amount), 0);
-
-      const balance = credit - debit;
-
-=======
     const STORAGE_KEY = 'finance_transactions_v2';
-    const API_URL = '/api/transactions';
+    const APP_CONFIG = window.FINANCE_APP_CONFIG || {};
+    const API_BASE_URL = (APP_CONFIG.API_BASE_URL || '').replace(/\\/$/, '');
+    const API_URL = `${API_BASE_URL}/api/transactions` || '/api/transactions';
+    const REQUIRE_REMOTE = APP_CONFIG.REQUIRE_REMOTE !== false;
     let usingRemote = false;
     let transactionsCache = [];
 
@@ -292,6 +131,7 @@
     const filterType = document.getElementById('filterType');
     const clearAllBtn = document.getElementById('clearAllBtn');
     const syncStatus = document.getElementById('syncStatus');
+    const globalWarning = document.getElementById('globalWarning');
 
     const creditTotal = document.getElementById('creditTotal');
     const debitTotal = document.getElementById('debitTotal');
@@ -302,9 +142,20 @@
 
     const setStatus = (remote) => {
       usingRemote = remote;
+      const offlineMessage = REQUIRE_REMOTE
+        ? 'Backend indisponível. Configure API_BASE_URL em app-config.js e publique backend para uso global.'
+        : 'Modo local (sem backend configurado)';
+
       syncStatus.innerHTML = remote
         ? '<span class="status-dot status-online"></span>Sincronização online (site + WhatsApp + apps instaláveis)'
-        : '<span class="status-dot status-offline"></span>Modo local (sem backend configurado)';
+        : `<span class="status-dot status-offline"></span>${offlineMessage}`;
+
+      globalWarning.classList.toggle('d-none', remote);
+      if (!remote) {
+        globalWarning.textContent = REQUIRE_REMOTE
+          ? 'Aplicação em modo global: sem backend online não há sincronização entre pessoas/dispositivos.'
+          : 'Você está no modo local. Os dados ficam somente neste navegador.';
+      }
     };
 
     const getLocalTransactions = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
@@ -322,12 +173,13 @@
         transactionsCache = payload.transactions || [];
         setStatus(true);
       } catch (error) {
-        transactionsCache = getLocalTransactions();
+        transactionsCache = REQUIRE_REMOTE ? [] : getLocalTransactions();
         setStatus(false);
       }
     };
 
     const persistCreate = async (transaction) => {
+      if (!usingRemote && REQUIRE_REMOTE) throw new Error('Backend indisponível');
       if (usingRemote) {
         await requestJSON(API_URL, { method: 'POST', body: JSON.stringify(transaction) });
         await loadTransactions();
@@ -338,6 +190,7 @@
     };
 
     const persistDelete = async (id) => {
+      if (!usingRemote && REQUIRE_REMOTE) throw new Error('Backend indisponível');
       if (usingRemote) {
         await requestJSON(`${API_URL}?id=${id}`, { method: 'DELETE' });
         await loadTransactions();
@@ -348,6 +201,7 @@
     };
 
     const persistClear = async () => {
+      if (!usingRemote && REQUIRE_REMOTE) throw new Error('Backend indisponível');
       if (usingRemote) {
         await requestJSON(API_URL, { method: 'DELETE' });
         await loadTransactions();
@@ -361,7 +215,6 @@
       const credit = rows.filter((t) => t.type === 'credito').reduce((acc, t) => acc + Number(t.amount), 0);
       const debit = rows.filter((t) => t.type === 'debito').reduce((acc, t) => acc + Number(t.amount), 0);
       const balance = credit - debit;
->>>>>>> codex/create-expense-management-app-40d774
       creditTotal.textContent = formatCurrency(credit);
       debitTotal.textContent = formatCurrency(debit);
       balanceTotal.textContent = formatCurrency(balance);
@@ -371,15 +224,7 @@
 
     const render = () => {
       const filter = filterType.value;
-<<<<<<< HEAD
-      const transactions = getTransactions();
-      const filtered = filter === 'todas'
-        ? transactions
-        : transactions.filter(t => t.type === filter);
-
-=======
       const filtered = filter === 'todas' ? transactionsCache : transactionsCache.filter((t) => t.type === filter);
->>>>>>> codex/create-expense-management-app-40d774
       body.innerHTML = '';
 
       filtered.forEach((transaction) => {
@@ -388,76 +233,14 @@
           <td>${transaction.description}</td>
           <td>${transaction.category}</td>
           <td>${formatDate(transaction.date)}</td>
-<<<<<<< HEAD
-          <td>
-            <span class="badge ${transaction.type === 'credito' ? 'badge-credit' : 'badge-debit'}">
-              ${transaction.type === 'credito' ? 'Crédito' : 'Débito'}
-            </span>
-          </td>
-          <td class="text-right font-weight-bold ${transaction.type === 'credito' ? 'text-success' : 'text-danger'}">
-            ${transaction.type === 'credito' ? '+' : '-'} ${formatCurrency(Number(transaction.amount))}
-          </td>
-          <td class="text-right">
-            <button class="btn btn-sm btn-outline-danger" data-id="${transaction.id}">
-              <i class="fas fa-trash"></i>
-            </button>
-          </td>
-=======
           <td><span class="badge ${transaction.type === 'credito' ? 'badge-credit' : 'badge-debit'}">${transaction.type === 'credito' ? 'Crédito' : 'Débito'}</span></td>
           <td class="text-right font-weight-bold ${transaction.type === 'credito' ? 'text-success' : 'text-danger'}">${transaction.type === 'credito' ? '+' : '-'} ${formatCurrency(Number(transaction.amount))}</td>
           <td class="text-right"><button class="btn btn-sm btn-outline-danger" data-id="${transaction.id}"><i class="fas fa-trash"></i></button></td>
->>>>>>> codex/create-expense-management-app-40d774
         `;
         body.appendChild(tr);
       });
 
       emptyState.classList.toggle('d-none', filtered.length > 0);
-<<<<<<< HEAD
-      updateSummary(transactions);
-    };
-
-    const addTransaction = (event) => {
-      event.preventDefault();
-
-      const description = document.getElementById('description').value.trim();
-      const amount = Number(document.getElementById('amount').value);
-      const type = document.getElementById('type').value;
-      const category = document.getElementById('category').value.trim();
-      const date = document.getElementById('date').value;
-
-      if (!description || !category || !date || amount <= 0) {
-        return;
-      }
-
-      const transactions = getTransactions();
-      transactions.unshift({
-        id: Date.now(),
-        description,
-        amount,
-        type,
-        category,
-        date
-      });
-
-      saveTransactions(transactions);
-      form.reset();
-      document.getElementById('date').valueAsDate = new Date();
-      render();
-    };
-
-    const removeTransaction = (id) => {
-      const transactions = getTransactions().filter(t => t.id !== id);
-      saveTransactions(transactions);
-      render();
-    };
-
-    form.addEventListener('submit', addTransaction);
-
-    body.addEventListener('click', (event) => {
-      const button = event.target.closest('button[data-id]');
-      if (!button) return;
-      removeTransaction(Number(button.dataset.id));
-=======
       updateSummary(transactionsCache);
     };
 
@@ -474,39 +257,36 @@
 
       if (!transaction.description || !transaction.category || !transaction.date || transaction.amount <= 0) return;
 
-      await persistCreate(transaction);
-      form.reset();
-      document.getElementById('date').valueAsDate = new Date();
-      render();
+      try {
+        await persistCreate(transaction);
+        form.reset();
+        document.getElementById('date').valueAsDate = new Date();
+        render();
+      } catch (error) {
+        alert('Backend indisponível. Para uso global, publique a API e configure app-config.js');
+      }
     });
 
     body.addEventListener('click', async (event) => {
       const button = event.target.closest('button[data-id]');
       if (!button) return;
-      await persistDelete(Number(button.dataset.id));
-      render();
+      try {
+        await persistDelete(Number(button.dataset.id));
+        render();
+      } catch (error) {
+        alert('Backend indisponível. Não foi possível remover no modo global.');
+      }
     });
 
     clearAllBtn.addEventListener('click', async () => {
       if (!confirm('Tem certeza que deseja apagar todas as movimentações?')) return;
       await persistClear();
       render();
->>>>>>> codex/create-expense-management-app-40d774
+ main
     });
 
     filterType.addEventListener('change', render);
 
-<<<<<<< HEAD
-    clearAllBtn.addEventListener('click', () => {
-      if (confirm('Tem certeza que deseja apagar todas as movimentações?')) {
-        localStorage.removeItem(STORAGE_KEY);
-        render();
-      }
-    });
-
-    document.getElementById('date').valueAsDate = new Date();
-    render();
-=======
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
     }
@@ -516,7 +296,6 @@
       await loadTransactions();
       render();
     })();
->>>>>>> codex/create-expense-management-app-40d774
   </script>
 </body>
 </html>
