@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/vagrant-lab/html/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/vagrant-lab/html/$1"
+    }
+  ]
+}
