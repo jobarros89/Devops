@@ -1,230 +1,270 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="pt-BR">
 <head>
-
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="">
-  <meta name="author" content="">
+  <title>Gestor Financeiro | Crédito e Débito</title>
 
-  <title>Landing Page - Start Bootstrap Theme</title>
-
-  <!-- Bootstrap core CSS -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#1d4ed8">
   <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- Custom fonts for this template -->
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
-  <link href="vendor/simple-line-icons/css/simple-line-icons.css" rel="stylesheet" type="text/css">
-  <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
 
-  <!-- Custom styles for this template -->
-  <link href="css/landing-page.min.css" rel="stylesheet">
-
+  <style>
+    body { background: #f5f7fb; min-height: 100vh; }
+    .app-header { background: linear-gradient(135deg, #1d4ed8, #2563eb); color: #fff; border-radius: 1rem; box-shadow: 0 12px 30px rgba(37, 99, 235, .25); }
+    .card { border: 0; border-radius: 1rem; box-shadow: 0 8px 20px rgba(15, 23, 42, .08); }
+    .summary-value { font-size: 1.4rem; font-weight: 700; }
+    .badge-credit { background-color: #d1fae5; color: #065f46; font-weight: 600; }
+    .badge-debit { background-color: #fee2e2; color: #991b1b; font-weight: 600; }
+    .table td, .table th { vertical-align: middle; }
+    .empty-state { padding: 2rem; text-align: center; color: #6b7280; }
+    .status-dot { width: .65rem; height: .65rem; border-radius: 50%; display: inline-block; margin-right: .4rem; }
+    .status-online { background: #16a34a; }
+    .status-offline { background: #d97706; }
+    code { background: #f1f5f9; padding: .1rem .3rem; border-radius: .35rem; }
+  </style>
 </head>
-
 <body>
-
-  <!-- Navigation -->
-  <nav class="navbar navbar-light bg-light static-top">
-    <div class="container">
-      <a class="navbar-brand" href="#">Start Bootstrap</a>
-      <a class="btn btn-primary" href="#">Sign In</a>
-    </div>
-  </nav>
-
-  <!-- Masthead -->
-  <header class="masthead text-white text-center">
-    <div class="overlay"></div>
-    <div class="container">
-      <div class="row">
-        <div class="col-xl-9 mx-auto">
-          <h1 class="mb-5">Build a landing page for your business or project and generate more leads!</h1>
+  <main class="container py-4 py-md-5">
+    <section class="app-header p-4 p-md-5 mb-4">
+      <div class="d-flex align-items-center justify-content-between flex-wrap">
+        <div>
+          <h1 class="h3 mb-1"><i class="fas fa-wallet mr-2"></i>Gestor Financeiro</h1>
+          <p class="mb-0">Controle crédito/débito no site e receba lançamentos enviados pelo WhatsApp.</p>
+          <small id="syncStatus" class="d-inline-flex align-items-center mt-2"></small>
         </div>
-        <div class="col-md-10 col-lg-8 col-xl-7 mx-auto">
-          <form>
+        <div class="mt-3 mt-md-0 d-flex gap-2">
+          <a href="dashboard.html" class="btn btn-light mr-2"><i class="fas fa-chart-line mr-1"></i>Dashboard de Saúde</a>
+          <button id="clearAllBtn" class="btn btn-outline-light"><i class="fas fa-trash-alt mr-1"></i>Limpar tudo</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="row">
+      <div class="col-lg-4 mb-4">
+        <div class="card p-4 h-100 mb-4">
+          <h2 class="h5 mb-3">Nova movimentação</h2>
+          <form id="transactionForm">
+            <div class="form-group">
+              <label for="description">Descrição</label>
+              <input id="description" class="form-control" placeholder="Ex.: Supermercado" required>
+            </div>
             <div class="form-row">
-              <div class="col-12 col-md-9 mb-2 mb-md-0">
-                <input type="email" class="form-control form-control-lg" placeholder="Enter your email...">
+              <div class="form-group col-md-6">
+                <label for="amount">Valor (R$)</label>
+                <input id="amount" type="number" min="0.01" step="0.01" class="form-control" required>
               </div>
-              <div class="col-12 col-md-3">
-                <button type="submit" class="btn btn-block btn-lg btn-primary">Sign up!</button>
+              <div class="form-group col-md-6">
+                <label for="type">Tipo</label>
+                <select id="type" class="form-control" required>
+                  <option value="credito">Crédito</option>
+                  <option value="debito">Débito</option>
+                </select>
               </div>
             </div>
+            <div class="form-group">
+              <label for="category">Categoria</label>
+              <input id="category" class="form-control" placeholder="Ex.: Alimentação" required>
+            </div>
+            <div class="form-group">
+              <label for="date">Data</label>
+              <input id="date" type="date" class="form-control" required>
+            </div>
+            <button class="btn btn-primary btn-block" type="submit"><i class="fas fa-plus mr-1"></i>Adicionar</button>
           </form>
         </div>
-      </div>
-    </div>
-  </header>
 
-  <!-- Icons Grid -->
-  <section class="features-icons bg-light text-center">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-4">
-          <div class="features-icons-item mx-auto mb-5 mb-lg-0 mb-lg-3">
-            <div class="features-icons-icon d-flex">
-              <i class="icon-screen-desktop m-auto text-primary"></i>
-            </div>
-            <h3>Fully Responsive</h3>
-            <p class="lead mb-0">This theme will look great on any device, no matter the size!</p>
-          </div>
-        </div>
-        <div class="col-lg-4">
-          <div class="features-icons-item mx-auto mb-5 mb-lg-0 mb-lg-3">
-            <div class="features-icons-icon d-flex">
-              <i class="icon-layers m-auto text-primary"></i>
-            </div>
-            <h3>Bootstrap 4 Ready</h3>
-            <p class="lead mb-0">Featuring the latest build of the new Bootstrap 4 framework!</p>
-          </div>
-        </div>
-        <div class="col-lg-4">
-          <div class="features-icons-item mx-auto mb-0 mb-lg-3">
-            <div class="features-icons-icon d-flex">
-              <i class="icon-check m-auto text-primary"></i>
-            </div>
-            <h3>Easy to Use</h3>
-            <p class="lead mb-0">Ready to use with your own content, or customize the source files!</p>
-          </div>
+        <div class="card p-4">
+          <h2 class="h6">Integração WhatsApp</h2>
+          <p class="mb-2">Envie para o número do seu bot no formato:</p>
+          <p class="mb-2"><code>credito 120.50 almoço #alimentacao</code></p>
+          <p class="mb-2"><code>debito 89.90 uber #transporte</code></p>
+          <small class="text-muted">Essas mensagens são processadas pelo endpoint <code>/api/whatsapp-webhook</code>.</small>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- Image Showcases -->
-  <section class="showcase">
-    <div class="container-fluid p-0">
-      <div class="row no-gutters">
+      <div class="col-lg-8">
+        <div class="row mb-3">
+          <div class="col-md-4 mb-3 mb-md-0"><div class="card p-3"><small class="text-muted">Total crédito</small><div id="creditTotal" class="summary-value text-success">R$ 0,00</div></div></div>
+          <div class="col-md-4 mb-3 mb-md-0"><div class="card p-3"><small class="text-muted">Total débito</small><div id="debitTotal" class="summary-value text-danger">R$ 0,00</div></div></div>
+          <div class="col-md-4"><div class="card p-3"><small class="text-muted">Saldo</small><div id="balanceTotal" class="summary-value text-primary">R$ 0,00</div></div></div>
+        </div>
 
-        <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image: url('img/bg-showcase-1.jpg');"></div>
-        <div class="col-lg-6 order-lg-1 my-auto showcase-text">
-          <h2>Fully Responsive Design</h2>
-          <p class="lead mb-0">When you use a theme created by Start Bootstrap, you know that the theme will look great on any device, whether it's a phone, tablet, or desktop the page will behave responsively!</p>
-        </div>
-      </div>
-      <div class="row no-gutters">
-        <div class="col-lg-6 text-white showcase-img" style="background-image: url('img/bg-showcase-2.jpg');"></div>
-        <div class="col-lg-6 my-auto showcase-text">
-          <h2>Updated For Bootstrap 4</h2>
-          <p class="lead mb-0">Newly improved, and full of great utility classes, Bootstrap 4 is leading the way in mobile responsive web development! All of the themes on Start Bootstrap are now using Bootstrap 4!</p>
-        </div>
-      </div>
-      <div class="row no-gutters">
-        <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image: url('img/bg-showcase-3.jpg');"></div>
-        <div class="col-lg-6 order-lg-1 my-auto showcase-text">
-          <h2>Easy to Use &amp; Customize</h2>
-          <p class="lead mb-0">Landing Page is just HTML and CSS with a splash of SCSS for users who demand some deeper customization options. Out of the box, just add your content and images, and your new landing page will be ready to go!</p>
+        <div class="card p-3 p-md-4">
+          <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+            <h2 class="h5 mb-2 mb-sm-0">Histórico de movimentações</h2>
+            <select id="filterType" class="form-control form-control-sm" style="max-width: 220px;">
+              <option value="todas">Filtrar: Todas</option>
+              <option value="credito">Somente crédito</option>
+              <option value="debito">Somente débito</option>
+            </select>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead><tr><th>Descrição</th><th>Categoria</th><th>Data</th><th>Tipo</th><th class="text-right">Valor</th><th class="text-right">Ações</th></tr></thead>
+              <tbody id="transactionsBody"></tbody>
+            </table>
+          </div>
+          <div id="emptyState" class="empty-state d-none">Nenhuma movimentação cadastrada.</div>
         </div>
       </div>
     </div>
-  </section>
+  </main>
 
-  <!-- Testimonials -->
-  <section class="testimonials text-center bg-light">
-    <div class="container">
-      <h2 class="mb-5">What people are saying...</h2>
-      <div class="row">
-        <div class="col-lg-4">
-          <div class="testimonial-item mx-auto mb-5 mb-lg-0">
-            <img class="img-fluid rounded-circle mb-3" src="img/testimonials-1.jpg" alt="">
-            <h5>Margaret E.</h5>
-            <p class="font-weight-light mb-0">"This is fantastic! Thanks so much guys!"</p>
-          </div>
-        </div>
-        <div class="col-lg-4">
-          <div class="testimonial-item mx-auto mb-5 mb-lg-0">
-            <img class="img-fluid rounded-circle mb-3" src="img/testimonials-2.jpg" alt="">
-            <h5>Fred S.</h5>
-            <p class="font-weight-light mb-0">"Bootstrap is amazing. I've been using it to create lots of super nice landing pages."</p>
-          </div>
-        </div>
-        <div class="col-lg-4">
-          <div class="testimonial-item mx-auto mb-5 mb-lg-0">
-            <img class="img-fluid rounded-circle mb-3" src="img/testimonials-3.jpg" alt="">
-            <h5>Sarah W.</h5>
-            <p class="font-weight-light mb-0">"Thanks so much for making these free resources available to us!"</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <script>
+    const STORAGE_KEY = 'finance_transactions_v2';
+    const API_URL = '/api/transactions';
+    let usingRemote = false;
+    let transactionsCache = [];
 
-  <!-- Call to Action -->
-  <section class="call-to-action text-white text-center">
-    <div class="overlay"></div>
-    <div class="container">
-      <div class="row">
-        <div class="col-xl-9 mx-auto">
-          <h2 class="mb-4">Ready to get started? Sign up now!</h2>
-        </div>
-        <div class="col-md-10 col-lg-8 col-xl-7 mx-auto">
-          <form>
-            <div class="form-row">
-              <div class="col-12 col-md-9 mb-2 mb-md-0">
-                <input type="email" class="form-control form-control-lg" placeholder="Enter your email...">
-              </div>
-              <div class="col-12 col-md-3">
-                <button type="submit" class="btn btn-block btn-lg btn-primary">Sign up!</button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </section>
+    const form = document.getElementById('transactionForm');
+    const body = document.getElementById('transactionsBody');
+    const emptyState = document.getElementById('emptyState');
+    const filterType = document.getElementById('filterType');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    const syncStatus = document.getElementById('syncStatus');
 
-  <!-- Footer -->
-  <footer class="footer bg-light">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-6 h-100 text-center text-lg-left my-auto">
-          <ul class="list-inline mb-2">
-            <li class="list-inline-item">
-              <a href="#">About</a>
-            </li>
-            <li class="list-inline-item">&sdot;</li>
-            <li class="list-inline-item">
-              <a href="#">Contact</a>
-            </li>
-            <li class="list-inline-item">&sdot;</li>
-            <li class="list-inline-item">
-              <a href="#">Terms of Use</a>
-            </li>
-            <li class="list-inline-item">&sdot;</li>
-            <li class="list-inline-item">
-              <a href="#">Privacy Policy</a>
-            </li>
-          </ul>
-          <p class="text-muted small mb-4 mb-lg-0">&copy; Your Website 2019. All Rights Reserved.</p>
-        </div>
-        <div class="col-lg-6 h-100 text-center text-lg-right my-auto">
-          <ul class="list-inline mb-0">
-            <li class="list-inline-item mr-3">
-              <a href="#">
-                <i class="fab fa-facebook fa-2x fa-fw"></i>
-              </a>
-            </li>
-            <li class="list-inline-item mr-3">
-              <a href="#">
-                <i class="fab fa-twitter-square fa-2x fa-fw"></i>
-              </a>
-            </li>
-            <li class="list-inline-item">
-              <a href="#">
-                <i class="fab fa-instagram fa-2x fa-fw"></i>
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </footer>
+    const creditTotal = document.getElementById('creditTotal');
+    const debitTotal = document.getElementById('debitTotal');
+    const balanceTotal = document.getElementById('balanceTotal');
 
-  <!-- Bootstrap core JavaScript -->
-  <script src="vendor/jquery/jquery.min.js"></script>
-  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    const formatCurrency = (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const formatDate = (date) => date ? date.split('-').reverse().join('/') : '-';
 
+    const setStatus = (remote) => {
+      usingRemote = remote;
+      syncStatus.innerHTML = remote
+        ? '<span class="status-dot status-online"></span>Sincronização online (site + WhatsApp + apps instaláveis)'
+        : '<span class="status-dot status-offline"></span>Modo local (sem backend configurado)';
+    };
+
+    const getLocalTransactions = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    const saveLocalTransactions = (rows) => localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
+
+    const requestJSON = async (url, options = {}) => {
+      const response = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options });
+      if (!response.ok) throw new Error('API indisponível');
+      return response.status === 204 ? null : response.json();
+    };
+
+    const loadTransactions = async () => {
+      try {
+        const payload = await requestJSON(API_URL);
+        transactionsCache = payload.transactions || [];
+        setStatus(true);
+      } catch (error) {
+        transactionsCache = getLocalTransactions();
+        setStatus(false);
+      }
+    };
+
+    const persistCreate = async (transaction) => {
+      if (usingRemote) {
+        await requestJSON(API_URL, { method: 'POST', body: JSON.stringify(transaction) });
+        await loadTransactions();
+        return;
+      }
+      transactionsCache.unshift(transaction);
+      saveLocalTransactions(transactionsCache);
+    };
+
+    const persistDelete = async (id) => {
+      if (usingRemote) {
+        await requestJSON(`${API_URL}?id=${id}`, { method: 'DELETE' });
+        await loadTransactions();
+        return;
+      }
+      transactionsCache = transactionsCache.filter((t) => t.id !== id);
+      saveLocalTransactions(transactionsCache);
+    };
+
+    const persistClear = async () => {
+      if (usingRemote) {
+        await requestJSON(API_URL, { method: 'DELETE' });
+        await loadTransactions();
+        return;
+      }
+      transactionsCache = [];
+      localStorage.removeItem(STORAGE_KEY);
+    };
+
+    const updateSummary = (rows) => {
+      const credit = rows.filter((t) => t.type === 'credito').reduce((acc, t) => acc + Number(t.amount), 0);
+      const debit = rows.filter((t) => t.type === 'debito').reduce((acc, t) => acc + Number(t.amount), 0);
+      const balance = credit - debit;
+      creditTotal.textContent = formatCurrency(credit);
+      debitTotal.textContent = formatCurrency(debit);
+      balanceTotal.textContent = formatCurrency(balance);
+      balanceTotal.classList.toggle('text-danger', balance < 0);
+      balanceTotal.classList.toggle('text-primary', balance >= 0);
+    };
+
+    const render = () => {
+      const filter = filterType.value;
+      const filtered = filter === 'todas' ? transactionsCache : transactionsCache.filter((t) => t.type === filter);
+      body.innerHTML = '';
+
+      filtered.forEach((transaction) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${transaction.description}</td>
+          <td>${transaction.category}</td>
+          <td>${formatDate(transaction.date)}</td>
+          <td><span class="badge ${transaction.type === 'credito' ? 'badge-credit' : 'badge-debit'}">${transaction.type === 'credito' ? 'Crédito' : 'Débito'}</span></td>
+          <td class="text-right font-weight-bold ${transaction.type === 'credito' ? 'text-success' : 'text-danger'}">${transaction.type === 'credito' ? '+' : '-'} ${formatCurrency(Number(transaction.amount))}</td>
+          <td class="text-right"><button class="btn btn-sm btn-outline-danger" data-id="${transaction.id}"><i class="fas fa-trash"></i></button></td>
+        `;
+        body.appendChild(tr);
+      });
+
+      emptyState.classList.toggle('d-none', filtered.length > 0);
+      updateSummary(transactionsCache);
+    };
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const transaction = {
+        id: Date.now(),
+        description: document.getElementById('description').value.trim(),
+        amount: Number(document.getElementById('amount').value),
+        type: document.getElementById('type').value,
+        category: document.getElementById('category').value.trim(),
+        date: document.getElementById('date').value
+      };
+
+      if (!transaction.description || !transaction.category || !transaction.date || transaction.amount <= 0) return;
+
+      await persistCreate(transaction);
+      form.reset();
+      document.getElementById('date').valueAsDate = new Date();
+      render();
+    });
+
+    body.addEventListener('click', async (event) => {
+      const button = event.target.closest('button[data-id]');
+      if (!button) return;
+      await persistDelete(Number(button.dataset.id));
+      render();
+    });
+
+    clearAllBtn.addEventListener('click', async () => {
+      if (!confirm('Tem certeza que deseja apagar todas as movimentações?')) return;
+      await persistClear();
+      render();
+    });
+
+    filterType.addEventListener('change', render);
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+    }
+
+    (async () => {
+      document.getElementById('date').valueAsDate = new Date();
+      await loadTransactions();
+      render();
+    })();
+  </script>
 </body>
-
 </html>

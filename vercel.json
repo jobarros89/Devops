@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "routes": [
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "^/$",
+      "dest": "/vagrant-lab/html/index.html"
+    },
+    {
+      "src": "^/(.*)$",
+      "dest": "/vagrant-lab/html/$1"
+    }
+  ]
+}
