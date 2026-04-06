@@ -1,5 +1,5 @@
 {
-<<<<<<< HEAD
+  "version": 2,
   "rewrites": [
     {
       "source": "/",
@@ -8,20 +8,6 @@
     {
       "source": "/(.*)",
       "destination": "/vagrant-lab/html/$1"
-=======
-  "version": 2,
-  "routes": [
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "^/$",
-      "dest": "/vagrant-lab/html/index.html"
-    },
-    {
-      "src": "^/(.*)$",
-      "dest": "/vagrant-lab/html/$1"
->>>>>>> codex/create-expense-management-app-40d774
     }
   ]
 }
