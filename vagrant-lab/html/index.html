@@ -4,26 +4,30 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Gestor Financeiro | Crédito e Débito</title>
-
+ 
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#1d4ed8">
   <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
-
+ 
   <style>
     body { background: #f5f7fb; min-height: 100vh; }
     .app-header { background: linear-gradient(135deg, #1d4ed8, #2563eb); color: #fff; border-radius: 1rem; box-shadow: 0 12px 30px rgba(37, 99, 235, .25); }
     .card { border: 0; border-radius: 1rem; box-shadow: 0 8px 20px rgba(15, 23, 42, .08); }
     .summary-value { font-size: 1.4rem; font-weight: 700; }
-    .badge-credit { background-color: #d1fae5; color: #065f46; font-weight: 600; }
-    .badge-debit { background-color: #fee2e2; color: #991b1b; font-weight: 600; }
+    .badge-credit  { background-color: #d1fae5; color: #065f46; font-weight: 600; }
+    .badge-debit   { background-color: #fee2e2; color: #991b1b; font-weight: 600; }
+    .badge-entrada { background-color: #dbeafe; color: #1e40af; font-weight: 600; }
     .table td, .table th { vertical-align: middle; }
     .empty-state { padding: 2rem; text-align: center; color: #6b7280; }
     .status-dot { width: .65rem; height: .65rem; border-radius: 50%; display: inline-block; margin-right: .4rem; }
-    .status-online { background: #16a34a; }
+    .status-online  { background: #16a34a; }
     .status-offline { background: #d97706; }
     code { background: #f1f5f9; padding: .1rem .3rem; border-radius: .35rem; }
- main
+    .venc-ok      { color: #16a34a; font-size: .75rem; font-weight: 600; }
+    .venc-alert   { color: #dc2626; font-size: .75rem; font-weight: 600; }
+    .venc-warning { color: #d97706; font-size: .75rem; font-weight: 600; }
+    .venc-none    { color: #9ca3af; font-size: .75rem; }
   </style>
 </head>
 <body>
@@ -41,10 +45,11 @@
         </div>
       </div>
     </section>
-
-    <div id="globalWarning" class="alert alert-warning global-warning d-none" role="alert"></div>
-
+ 
+    <div id="globalWarning" class="alert alert-warning d-none" role="alert"></div>
+ 
     <div class="row">
+      <!-- FORM -->
       <div class="col-lg-4 mb-4">
         <div class="card p-4 h-100 mb-4">
           <h2 class="h5 mb-3">Nova movimentação</h2>
@@ -63,6 +68,7 @@
                 <select id="type" class="form-control" required>
                   <option value="credito">Crédito</option>
                   <option value="debito">Débito</option>
+                  <option value="entrada">Entrada</option>
                 </select>
               </div>
             </div>
@@ -71,13 +77,21 @@
               <input id="category" class="form-control" placeholder="Ex.: Alimentação" required>
             </div>
             <div class="form-group">
-              <label for="date">Data</label>
+              <label for="date">Data do lançamento</label>
               <input id="date" type="date" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="dueDate">
+                Vencimento
+                <small class="text-muted">(opcional)</small>
+              </label>
+              <input id="dueDate" type="date" class="form-control">
+              <small class="form-text text-muted">Prazo de pagamento desta transação.</small>
             </div>
             <button class="btn btn-primary btn-block" type="submit"><i class="fas fa-plus mr-1"></i>Adicionar</button>
           </form>
         </div>
-
+ 
         <div class="card p-4">
           <h2 class="h6">Integração WhatsApp</h2>
           <p class="mb-2">Envie para o número do seu bot no formato:</p>
@@ -86,14 +100,15 @@
           <small class="text-muted">Essas mensagens são processadas pelo endpoint <code>/api/whatsapp-webhook</code>.</small>
         </div>
       </div>
-
+ 
+      <!-- LISTA -->
       <div class="col-lg-8">
         <div class="row mb-3">
-          <div class="col-md-4 mb-3 mb-md-0"><div class="card p-3"><small class="text-muted">Total crédito</small><div id="creditTotal" class="summary-value text-success">R$ 0,00</div></div></div>
+          <div class="col-md-4 mb-3 mb-md-0"><div class="card p-3"><small class="text-muted">Total crédito + entradas</small><div id="creditTotal" class="summary-value text-success">R$ 0,00</div></div></div>
           <div class="col-md-4 mb-3 mb-md-0"><div class="card p-3"><small class="text-muted">Total débito</small><div id="debitTotal" class="summary-value text-danger">R$ 0,00</div></div></div>
           <div class="col-md-4"><div class="card p-3"><small class="text-muted">Saldo</small><div id="balanceTotal" class="summary-value text-primary">R$ 0,00</div></div></div>
         </div>
-
+ 
         <div class="card p-3 p-md-4">
           <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
             <h2 class="h5 mb-2 mb-sm-0">Histórico de movimentações</h2>
@@ -101,11 +116,22 @@
               <option value="todas">Filtrar: Todas</option>
               <option value="credito">Somente crédito</option>
               <option value="debito">Somente débito</option>
+              <option value="entrada">Somente entradas</option>
             </select>
           </div>
           <div class="table-responsive">
             <table class="table table-hover mb-0">
-              <thead><tr><th>Descrição</th><th>Categoria</th><th>Data</th><th>Tipo</th><th class="text-right">Valor</th><th class="text-right">Ações</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Descrição</th>
+                  <th>Categoria</th>
+                  <th>Data</th>
+                  <th>Vencimento</th>
+                  <th>Tipo</th>
+                  <th class="text-right">Valor</th>
+                  <th class="text-right">Ações</th>
+                </tr>
+              </thead>
               <tbody id="transactionsBody"></tbody>
             </table>
           </div>
@@ -114,183 +140,175 @@
       </div>
     </div>
   </main>
-
+ 
   <script src="app-config.js"></script>
   <script>
-    const STORAGE_KEY = 'finance_transactions_v2';
-    const APP_CONFIG = window.FINANCE_APP_CONFIG || {};
-    const API_BASE_URL = (APP_CONFIG.API_BASE_URL || '').replace(/\/$/, '');
-    const API_URL = `${API_BASE_URL}/api/transactions` || '/api/transactions';
+    const STORAGE_KEY    = 'finance_transactions_v2';
+    const APP_CONFIG     = window.FINANCE_APP_CONFIG || {};
+    const API_BASE_URL   = (APP_CONFIG.API_BASE_URL || '').replace(/\/$/, '');
+    const API_URL        = `${API_BASE_URL}/api/transactions` || '/api/transactions';
     const REQUIRE_REMOTE = APP_CONFIG.REQUIRE_REMOTE !== false;
     let usingRemote = false;
     let transactionsCache = [];
-
-    const form = document.getElementById('transactionForm');
-    const body = document.getElementById('transactionsBody');
-    const emptyState = document.getElementById('emptyState');
-    const filterType = document.getElementById('filterType');
-    const clearAllBtn = document.getElementById('clearAllBtn');
-    const syncStatus = document.getElementById('syncStatus');
-    const globalWarning = document.getElementById('globalWarning');
-
-    const creditTotal = document.getElementById('creditTotal');
-    const debitTotal = document.getElementById('debitTotal');
+ 
+    const form         = document.getElementById('transactionForm');
+    const body         = document.getElementById('transactionsBody');
+    const emptyState   = document.getElementById('emptyState');
+    const filterType   = document.getElementById('filterType');
+    const clearAllBtn  = document.getElementById('clearAllBtn');
+    const syncStatus   = document.getElementById('syncStatus');
+    const globalWarning= document.getElementById('globalWarning');
+    const creditTotal  = document.getElementById('creditTotal');
+    const debitTotal   = document.getElementById('debitTotal');
     const balanceTotal = document.getElementById('balanceTotal');
-
-    const formatCurrency = (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    const formatDate = (date) => date ? date.split('-').reverse().join('/') : '-';
-
+ 
+    const formatCurrency = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const formatDate     = (d) => d ? d.split('-').reverse().join('/') : '-';
+ 
+    // Retorna label e classe CSS para o vencimento
+    function dueDateStatus(dueDate) {
+      if (!dueDate) return { label: '—', cls: 'venc-none' };
+      const today = new Date(); today.setHours(0,0,0,0);
+      const due   = new Date(dueDate + 'T00:00:00');
+      const diff  = Math.round((due - today) / 86400000);
+      if (diff < 0)  return { label: `Vencido há ${Math.abs(diff)}d`, cls: 'venc-alert' };
+      if (diff === 0) return { label: 'Vence hoje!', cls: 'venc-alert' };
+      if (diff <= 5) return { label: `Vence em ${diff}d`, cls: 'venc-warning' };
+      return { label: formatDate(dueDate), cls: 'venc-ok' };
+    }
+ 
     const setStatus = (remote) => {
       usingRemote = remote;
-      const offlineMessage = REQUIRE_REMOTE
-        ? 'Backend indisponível. Configure API_BASE_URL em app-config.js e publique backend para uso global.'
+      const offlineMsg = REQUIRE_REMOTE
+        ? 'Backend indisponível. Configure API_BASE_URL em app-config.js.'
         : 'Modo local (sem backend configurado)';
-
       syncStatus.innerHTML = remote
-        ? '<span class="status-dot status-online"></span>Sincronização online (site + WhatsApp + apps instaláveis)'
-        : `<span class="status-dot status-offline"></span>${offlineMessage}`;
-
+        ? '<span class="status-dot status-online"></span>Sincronização online'
+        : `<span class="status-dot status-offline"></span>${offlineMsg}`;
       globalWarning.classList.toggle('d-none', remote);
-      if (!remote) {
-        globalWarning.textContent = REQUIRE_REMOTE
-          ? 'Aplicação em modo global: sem backend online não há sincronização entre pessoas/dispositivos.'
-          : 'Você está no modo local. Os dados ficam somente neste navegador.';
-      }
+      if (!remote) globalWarning.textContent = REQUIRE_REMOTE
+        ? 'Aplicação em modo global: sem backend online não há sincronização entre dispositivos.'
+        : 'Você está no modo local. Os dados ficam somente neste navegador.';
     };
-
-    const getLocalTransactions = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    const saveLocalTransactions = (rows) => localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
-
+ 
+    const getLocal  = ()      => JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    const saveLocal = (rows)  => localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
+ 
     const requestJSON = async (url, options = {}) => {
-      const response = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options });
-      if (!response.ok) throw new Error('API indisponível');
-      return response.status === 204 ? null : response.json();
+      const res = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options });
+      if (!res.ok) throw new Error('API indisponível');
+      return res.status === 204 ? null : res.json();
     };
-
+ 
     const loadTransactions = async () => {
       try {
         const payload = await requestJSON(API_URL);
         transactionsCache = payload.transactions || [];
         setStatus(true);
-      } catch (error) {
-        transactionsCache = REQUIRE_REMOTE ? [] : getLocalTransactions();
+      } catch {
+        transactionsCache = REQUIRE_REMOTE ? [] : getLocal();
         setStatus(false);
       }
     };
-
-    const persistCreate = async (transaction) => {
+ 
+    const persistCreate = async (t) => {
       if (!usingRemote && REQUIRE_REMOTE) throw new Error('Backend indisponível');
-      if (usingRemote) {
-        await requestJSON(API_URL, { method: 'POST', body: JSON.stringify(transaction) });
-        await loadTransactions();
-        return;
-      }
-      transactionsCache.unshift(transaction);
-      saveLocalTransactions(transactionsCache);
+      if (usingRemote) { await requestJSON(API_URL, { method: 'POST', body: JSON.stringify(t) }); await loadTransactions(); return; }
+      transactionsCache.unshift(t); saveLocal(transactionsCache);
     };
-
+ 
     const persistDelete = async (id) => {
       if (!usingRemote && REQUIRE_REMOTE) throw new Error('Backend indisponível');
-      if (usingRemote) {
-        await requestJSON(`${API_URL}?id=${id}`, { method: 'DELETE' });
-        await loadTransactions();
-        return;
-      }
-      transactionsCache = transactionsCache.filter((t) => t.id !== id);
-      saveLocalTransactions(transactionsCache);
+      if (usingRemote) { await requestJSON(`${API_URL}?id=${id}`, { method: 'DELETE' }); await loadTransactions(); return; }
+      transactionsCache = transactionsCache.filter((t) => t.id !== id); saveLocal(transactionsCache);
     };
-
+ 
     const persistClear = async () => {
       if (!usingRemote && REQUIRE_REMOTE) throw new Error('Backend indisponível');
-      if (usingRemote) {
-        await requestJSON(API_URL, { method: 'DELETE' });
-        await loadTransactions();
-        return;
-      }
-      transactionsCache = [];
-      localStorage.removeItem(STORAGE_KEY);
+      if (usingRemote) { await requestJSON(API_URL, { method: 'DELETE' }); await loadTransactions(); return; }
+      transactionsCache = []; localStorage.removeItem(STORAGE_KEY);
     };
-
+ 
     const updateSummary = (rows) => {
-      const credit = rows.filter((t) => t.type === 'credito').reduce((acc, t) => acc + Number(t.amount), 0);
-      const debit = rows.filter((t) => t.type === 'debito').reduce((acc, t) => acc + Number(t.amount), 0);
+      const credit  = rows.filter((t) => t.type === 'credito' || t.type === 'entrada').reduce((a, t) => a + Number(t.amount), 0);
+      const debit   = rows.filter((t) => t.type === 'debito').reduce((a, t) => a + Number(t.amount), 0);
       const balance = credit - debit;
-      creditTotal.textContent = formatCurrency(credit);
-      debitTotal.textContent = formatCurrency(debit);
+      creditTotal.textContent  = formatCurrency(credit);
+      debitTotal.textContent   = formatCurrency(debit);
       balanceTotal.textContent = formatCurrency(balance);
       balanceTotal.classList.toggle('text-danger', balance < 0);
       balanceTotal.classList.toggle('text-primary', balance >= 0);
     };
-
+ 
+    const typeBadge = (type) => {
+      if (type === 'credito') return '<span class="badge badge-credit">Crédito</span>';
+      if (type === 'entrada') return '<span class="badge badge-entrada">Entrada</span>';
+      return '<span class="badge badge-debit">Débito</span>';
+    };
+ 
     const render = () => {
-      const filter = filterType.value;
+      const filter   = filterType.value;
       const filtered = filter === 'todas' ? transactionsCache : transactionsCache.filter((t) => t.type === filter);
       body.innerHTML = '';
-
-      filtered.forEach((transaction) => {
-        const tr = document.createElement('tr');
+      filtered.forEach((t) => {
+        const isPositive = t.type === 'credito' || t.type === 'entrada';
+        const due = dueDateStatus(t.dueDate);
+        const tr  = document.createElement('tr');
         tr.innerHTML = `
-          <td>${transaction.description}</td>
-          <td>${transaction.category}</td>
-          <td>${formatDate(transaction.date)}</td>
-          <td><span class="badge ${transaction.type === 'credito' ? 'badge-credit' : 'badge-debit'}">${transaction.type === 'credito' ? 'Crédito' : 'Débito'}</span></td>
-          <td class="text-right font-weight-bold ${transaction.type === 'credito' ? 'text-success' : 'text-danger'}">${transaction.type === 'credito' ? '+' : '-'} ${formatCurrency(Number(transaction.amount))}</td>
-          <td class="text-right"><button class="btn btn-sm btn-outline-danger" data-id="${transaction.id}"><i class="fas fa-trash"></i></button></td>
+          <td>${t.description}</td>
+          <td>${t.category}</td>
+          <td>${formatDate(t.date)}</td>
+          <td><span class="${due.cls}">${due.label}</span></td>
+          <td>${typeBadge(t.type)}</td>
+          <td class="text-right font-weight-bold ${isPositive ? 'text-success' : 'text-danger'}">${isPositive ? '+' : '-'} ${formatCurrency(Number(t.amount))}</td>
+          <td class="text-right"><button class="btn btn-sm btn-outline-danger" data-id="${t.id}"><i class="fas fa-trash"></i></button></td>
         `;
         body.appendChild(tr);
       });
-
       emptyState.classList.toggle('d-none', filtered.length > 0);
       updateSummary(transactionsCache);
     };
-
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const transaction = {
-        id: Date.now(),
+ 
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const t = {
+        id:          Date.now(),
         description: document.getElementById('description').value.trim(),
-        amount: Number(document.getElementById('amount').value),
-        type: document.getElementById('type').value,
-        category: document.getElementById('category').value.trim(),
-        date: document.getElementById('date').value
+        amount:      Number(document.getElementById('amount').value),
+        type:        document.getElementById('type').value,
+        category:    document.getElementById('category').value.trim(),
+        date:        document.getElementById('date').value,
+        dueDate:     document.getElementById('dueDate').value || null
       };
-
-      if (!transaction.description || !transaction.category || !transaction.date || transaction.amount <= 0) return;
-
+      if (!t.description || !t.category || !t.date || t.amount <= 0) return;
       try {
-        await persistCreate(transaction);
+        await persistCreate(t);
         form.reset();
         document.getElementById('date').valueAsDate = new Date();
         render();
-      } catch (error) {
+      } catch {
         alert('Backend indisponível. Para uso global, publique a API e configure app-config.js');
       }
     });
-
-    body.addEventListener('click', async (event) => {
-      const button = event.target.closest('button[data-id]');
-      if (!button) return;
-      try {
-        await persistDelete(Number(button.dataset.id));
-        render();
-      } catch (error) {
-        alert('Backend indisponível. Não foi possível remover no modo global.');
-      }
+ 
+    body.addEventListener('click', async (e) => {
+      const btn = e.target.closest('button[data-id]');
+      if (!btn) return;
+      try { await persistDelete(Number(btn.dataset.id)); render(); }
+      catch { alert('Backend indisponível. Não foi possível remover no modo global.'); }
     });
-
+ 
     clearAllBtn.addEventListener('click', async () => {
       if (!confirm('Tem certeza que deseja apagar todas as movimentações?')) return;
-      await persistClear();
-      render();
- main
+      await persistClear(); render();
     });
-
+ 
     filterType.addEventListener('change', render);
-
+ 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
     }
-
+ 
     (async () => {
       document.getElementById('date').valueAsDate = new Date();
       await loadTransactions();
@@ -298,4 +316,3 @@
     })();
   </script>
 </body>
-</html>
