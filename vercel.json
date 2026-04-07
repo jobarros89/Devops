@@ -6,6 +6,14 @@
       "destination": "/vagrant-lab/html/index.html"
     },
     {
+      "source": "/dashboard",
+      "destination": "/vagrant-lab/html/dashboard.html"
+    },
+    {
+      "source": "/api/transactions",
+      "destination": "/api/transactions.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/vagrant-lab/html/$1"
     }
