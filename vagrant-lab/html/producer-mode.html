@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Producer Mode | Warp & BPM Sync</title>
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #11131a;
+      --panel: #1a1e29;
+      --line: #2a3040;
+      --accent: #63b3ff;
+      --accent-2: #f472b6;
+      --warn: #f59e0b;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+    }
+    body { background: var(--bg); color: var(--text); }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: .8rem; }
+    .panel h2 { font-size: 1rem; color: #fff; }
+    .control-label { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; }
+    .timeline-wrap { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: .8rem; background: #0e1016; }
+    canvas { width: 100%; height: 260px; display: block; cursor: crosshair; }
+    .badge-mode { background: #172554; color: #bfdbfe; border: 1px solid #1d4ed8; }
+    .btn-toolbar .btn { margin-right: .4rem; margin-bottom: .4rem; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    .status { font-size: .9rem; color: var(--muted); }
+    .small-input { max-width: 130px; }
+    .key-tip { border: 1px solid var(--line); border-radius: .4rem; padding: .15rem .35rem; font-size: .75rem; color: var(--muted); }
+    .project-grid { color: var(--muted); font-size: .85rem; }
+  </style>
+</head>
+<body>
+<div class="container-fluid py-3">
+  <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+    <h1 class="h4 mb-2"><i class="fas fa-wave-square mr-2"></i>Producer Mode — Warp, BPM e Sync Profissional</h1>
+    <span class="badge badge-mode px-3 py-2">Precisão > Performance</span>
+  </div>
+
+  <div class="row">
+    <div class="col-xl-3 mb-3">
+      <div class="panel p-3 mb-3">
+        <h2>Projeto</h2>
+        <div class="form-group">
+          <label class="control-label" for="projectBpm">BPM do projeto</label>
+          <input id="projectBpm" type="number" step="0.01" class="form-control form-control-sm small-input" value="120.00" />
+        </div>
+        <div class="form-group d-flex align-items-center flex-wrap">
+          <button id="tapTempoBtn" class="btn btn-sm btn-outline-info mr-2 mb-2">Tap Tempo</button>
+          <button id="halfTimeBtn" class="btn btn-sm btn-outline-secondary mr-2 mb-2">Half-time</button>
+          <button id="doubleTimeBtn" class="btn btn-sm btn-outline-secondary mb-2">Double-time</button>
+        </div>
+        <p class="mono mb-1">Tempo: <span id="projectTempoMs">500.00</span> ms / beat</p>
+        <p class="project-grid mb-0">Grid: 1.1.1 • 1.2.1 • 1.3.1 • 1.4.1</p>
+      </div>
+
+      <div class="panel p-3 mb-3">
+        <h2>Tracks</h2>
+        <div class="form-group">
+          <label class="control-label" for="trackAFile">Track A</label>
+          <input id="trackAFile" type="file" class="form-control-file" accept="audio/*" />
+        </div>
+        <div class="form-group">
+          <label class="control-label" for="trackBFile">Track B</label>
+          <input id="trackBFile" type="file" class="form-control-file" accept="audio/*" />
+        </div>
+        <button id="autoSyncBtn" class="btn btn-sm btn-primary mr-2">Sync automático</button>
+        <button id="toggleSnapBtn" class="btn btn-sm btn-outline-light">Snap: ON</button>
+      </div>
+
+      <div class="panel p-3">
+        <h2>Edição</h2>
+        <div class="btn-toolbar mb-2">
+          <button id="addMarkerBtn" class="btn btn-sm btn-outline-info">Add Warp Marker</button>
+          <button id="set111Btn" class="btn btn-sm btn-outline-warning">Set 1.1.1 Here</button>
+          <button id="warpFromHereBtn" class="btn btn-sm btn-outline-warning">Warp From Here</button>
+          <button id="undoBtn" class="btn btn-sm btn-outline-light">Undo</button>
+          <button id="redoBtn" class="btn btn-sm btn-outline-light">Redo</button>
+        </div>
+        <p class="mb-1">Nudge fino: <span class="key-tip">←</span> <span class="key-tip">→</span> (1ms)</p>
+        <p class="mb-1">Nudge sample-level: <span class="key-tip">Shift + ←/→</span></p>
+        <div class="form-group mb-0">
+          <label class="control-label" for="nudgeMs">Nudge (ms)</label>
+          <input id="nudgeMs" type="number" class="form-control form-control-sm small-input" step="0.1" value="1.0" />
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-9">
+      <div class="panel p-3 mb-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+          <h2 class="mb-2">Waveform Overlay + Transientes</h2>
+          <div>
+            <button id="zoomOutBtn" class="btn btn-sm btn-outline-light">- Zoom</button>
+            <button id="zoomInBtn" class="btn btn-sm btn-outline-light">+ Zoom</button>
+            <button id="playBtn" class="btn btn-sm btn-success"><i class="fas fa-play"></i></button>
+            <button id="pauseBtn" class="btn btn-sm btn-danger"><i class="fas fa-pause"></i></button>
+          </div>
+        </div>
+        <div class="timeline-wrap mt-3">
+          <canvas id="timelineCanvas" width="1600" height="260"></canvas>
+        </div>
+        <div class="d-flex justify-content-between mt-2">
+          <small class="status" id="statusText">Carregue duas tracks para iniciar warping manual.</small>
+          <small class="status mono" id="cursorTime">0.000s | 0 ms</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="producer-mode.js"></script>
+</body>
+</html>
