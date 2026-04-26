@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Producer Mode | DAW Warp & Sync</title>
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#0f1117; --panel:#171b26; --line:#2b3142; --text:#e5e7eb; --muted:#9ca3af;
+      --a:#4da3ff; --b:#ff9f40; --active-bg:#1e2635; --unsaved:#facc15;
+    }
+    body{background:var(--bg);color:var(--text)} .panel{background:var(--panel);border:1px solid var(--line);border-radius:.7rem}
+    .toolbar{position:sticky;top:0;z-index:5}
+    .track-lane{border:1px solid var(--line);border-left:8px solid transparent;border-radius:.65rem;background:#10141d;transition:.12s}
+    .track-lane.track-a{border-left-color:var(--a)} .track-lane.track-b{border-left-color:var(--b)}
+    .track-lane.active{background:var(--active-bg);box-shadow:0 0 0 1px #3b82f6 inset}
+    .track-lane.unsaved{box-shadow:0 0 0 1px var(--unsaved) inset}
+    .track-header{display:flex;justify-content:space-between;align-items:center;gap:.5rem;padding:.55rem .7rem;border-bottom:1px solid var(--line)}
+    .track-title{font-weight:700}.track-sub{font-size:.8rem;color:var(--muted)}
+    .edit-dot{font-size:.75rem;color:#60a5fa;display:none}.track-lane.active .edit-dot{display:inline}
+    canvas{display:block;width:100%;height:190px;cursor:crosshair} #minimapCanvas{height:70px}
+    .status{font-size:.82rem;color:var(--muted)} .chip{font-size:.75rem;border:1px solid var(--line);padding:.1rem .4rem;border-radius:.35rem}
+    .shortcut-panel{position:fixed;right:1rem;bottom:1rem;width:330px;background:#0b0f17;border:1px solid var(--line);border-radius:.65rem;padding:.8rem;display:none;z-index:20}
+    .shortcut-panel.open{display:block} .short-k{font-family:monospace;background:#141a25;padding:.1rem .3rem;border-radius:.3rem}
+  </style>
+</head>
+<body>
+<div class="container-fluid py-2">
+  <div class="panel toolbar p-2 mb-2">
+    <div class="d-flex align-items-center flex-wrap">
+      <strong class="mr-3">⚙ Producer Mode</strong>
+      <label class="mr-1 mb-0">BPM Projeto</label>
+      <input id="projectBpm" class="form-control form-control-sm mr-2" type="number" step="0.01" value="120.00" style="width:110px">
+      <span id="projectMs" class="chip mr-2">500.00 ms/beat</span>
+      <button id="tapTempoBtn" class="btn btn-sm btn-outline-info mr-1">Tap</button>
+      <button id="halfBtn" class="btn btn-sm btn-outline-secondary mr-1">÷2</button>
+      <button id="doubleBtn" class="btn btn-sm btn-outline-secondary mr-1">×2</button>
+      <button id="playBtn" class="btn btn-sm btn-success mr-1"><i class="fas fa-play"></i></button>
+      <button id="stopBtn" class="btn btn-sm btn-danger mr-1"><i class="fas fa-stop"></i></button>
+      <button id="autoSyncBtn" class="btn btn-sm btn-primary mr-1">Auto Sync</button>
+      <button id="overlayBtn" class="btn btn-sm btn-outline-light mr-1">Overlay ON</button>
+      <button id="snapBtn" class="btn btn-sm btn-outline-light mr-1">Snap ON</button>
+      <button id="syncScrollBtn" class="btn btn-sm btn-outline-light mr-1">Sync Scroll ON</button>
+      <button id="undoBtn" class="btn btn-sm btn-outline-light mr-1">Undo</button>
+      <button id="redoBtn" class="btn btn-sm btn-outline-light mr-1">Redo</button>
+      <button id="exportOpenBtn" class="btn btn-sm btn-warning">⬇ Exportar</button>
+    </div>
+  </div>
+
+  <div id="trackA" class="track-lane track-a active mb-2" data-track="A">
+    <div class="track-header">
+      <div>
+        <span class="edit-dot">● EDITANDO</span>
+        <span class="track-title">TRACK A</span>
+        <span class="track-sub" id="aName">| sem arquivo</span>
+        <span class="track-sub" id="aBpmInfo">| BPM: --</span>
+      </div>
+      <div class="d-flex align-items-center">
+        <input id="aFile" type="file" accept="audio/*" class="mr-1">
+        <input id="aBpm" class="form-control form-control-sm mr-1" type="number" step="0.01" placeholder="BPM" style="width:95px">
+        <button id="aMute" class="btn btn-sm btn-outline-light mr-1">Mute</button>
+        <button id="aSolo" class="btn btn-sm btn-outline-light mr-1">Solo</button>
+        <button id="aLock" class="btn btn-sm btn-outline-light mr-1">Lock</button>
+      </div>
+    </div>
+    <canvas id="canvasA" width="1800" height="190"></canvas>
+  </div>
+
+  <div id="trackB" class="track-lane track-b mb-2" data-track="B">
+    <div class="track-header">
+      <div>
+        <span class="edit-dot">● EDITANDO</span>
+        <span class="track-title">TRACK B</span>
+        <span class="track-sub" id="bName">| sem arquivo</span>
+        <span class="track-sub" id="bBpmInfo">| BPM: --</span>
+        <span class="track-sub" id="bDiff">| Δ projeto: --</span>
+      </div>
+      <div class="d-flex align-items-center">
+        <input id="bFile" type="file" accept="audio/*" class="mr-1">
+        <input id="bBpm" class="form-control form-control-sm mr-1" type="number" step="0.01" placeholder="BPM" style="width:95px">
+        <button id="bMute" class="btn btn-sm btn-outline-light mr-1">Mute</button>
+        <button id="bSolo" class="btn btn-sm btn-outline-light mr-1">Solo</button>
+        <button id="bLock" class="btn btn-sm btn-outline-light mr-1">Lock</button>
+      </div>
+    </div>
+    <canvas id="canvasB" width="1800" height="190"></canvas>
+  </div>
+
+  <div class="panel p-2 mb-2">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+      <strong>Minimap</strong>
+      <div>
+        <button id="zoomOutBtn" class="btn btn-sm btn-outline-light">- Zoom</button>
+        <button id="zoomInBtn" class="btn btn-sm btn-outline-light">+ Zoom</button>
+      </div>
+    </div>
+    <canvas id="minimapCanvas" width="1800" height="70"></canvas>
+  </div>
+
+  <div class="panel p-2">
+    <div class="row">
+      <div class="col-md-7">
+        <strong>Painel de Detalhes</strong>
+        <div class="status">Track ativa: <span id="activeTrackLabel">A</span> | Cursor: <span id="cursorInfo">0.000s | 0.00 ms</span></div>
+        <div class="status">Offset Track B: <input id="offsetMs" type="number" step="0.01" value="0" style="width:110px"> ms | <span id="offsetSamples">0 samples</span>
+          <button id="offsetReset" class="btn btn-sm btn-outline-light ml-1">Resetar</button>
+          <button id="snapNearestBtn" class="btn btn-sm btn-outline-info ml-1">Snap to Nearest Transient</button>
+        </div>
+        <div class="status">Warp marker: duplo clique cria • arrastar move • Shift sem snap • Alt copia • botão direito menu.</div>
+      </div>
+      <div class="col-md-5 text-right">
+        <span id="undoInfo" class="chip">↩ 0 ações para desfazer</span>
+        <span id="toast" class="chip"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="shortcuts" class="shortcut-panel">
+  <strong>Atalhos</strong>
+  <ul class="mb-0 mt-2">
+    <li><span class="short-k">Tab / Shift+Tab</span> alterna track ativa</li>
+    <li><span class="short-k">← →</span> ±10ms | <span class="short-k">Shift</span> ±1ms | <span class="short-k">Ctrl</span> ±1 sample | <span class="short-k">Alt</span> ±100ms</li>
+    <li><span class="short-k">S</span> Snap on/off</li>
+    <li><span class="short-k">Ctrl+Z</span> Undo | <span class="short-k">Ctrl+Shift+Z</span> Redo</li>
+    <li><span class="short-k">?</span> mostrar/ocultar este painel</li>
+  </ul>
+</div>
+
+<div class="modal fade" id="exportModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" style="background:#111722;color:#e5e7eb;border:1px solid #2b3142">
+      <div class="modal-header"><h5 class="modal-title">EXPORTAR RESULTADO</h5></div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>O que exportar?</label>
+          <select id="exportWhat" class="form-control form-control-sm">
+            <option value="mix">Mix final (A + B)</option>
+            <option value="A">Track A</option>
+            <option value="B">Track B</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-6"><label>Sample rate</label><select id="exportSr" class="form-control form-control-sm"><option>44100</option><option>48000</option></select></div>
+          <div class="form-group col-6"><label>Nome</label><input id="exportName" class="form-control form-control-sm" value="aligned_mix.wav"></div>
+        </div>
+        <div class="progress" style="height:8px"><div id="exportBar" class="progress-bar" style="width:0%"></div></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" data-dismiss="modal">Cancelar</button>
+        <button id="exportBtn" class="btn btn-warning btn-sm">⬇ Exportar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="vendor/jquery/jquery.min.js"></script>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="producer-mode.js"></script>
+</body>
+</html>
